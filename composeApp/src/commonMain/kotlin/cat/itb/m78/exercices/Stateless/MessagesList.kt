@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -15,6 +16,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalMapOf
+import androidx.compose.ui.unit.dp
 
 data class Message(val author: String, val body: String)
 
@@ -54,7 +57,7 @@ val messages = List(100){
 @Composable
 fun MessagesList() {
     Scaffold(
-        topBar = {
+        bottomBar = {
             TopAppBar(
                 title = { Text("App Bar Title") },
                 navigationIcon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, "back") })
@@ -64,10 +67,17 @@ fun MessagesList() {
                 Icon(Icons.Default.Add, "add")
             }
         }
-    ) {}
-    LazyColumn {
-        items(messages){
-
+    ) {
+        LazyColumn {
+            items(messages){
+                Card(modifier = Modifier.padding(bottom = 20.dp)){
+                    Column {
+                        Text(it.author)
+                        Text(it.body)
+                    }
+                }
+            }
         }
     }
+
 }
