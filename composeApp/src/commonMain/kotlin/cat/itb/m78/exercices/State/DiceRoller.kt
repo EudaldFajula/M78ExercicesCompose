@@ -7,14 +7,24 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import m78exercices.composeapp.generated.resources.Res
 import m78exercices.composeapp.generated.resources.allFontResources
 import m78exercices.composeapp.generated.resources.dice_1
@@ -37,56 +48,72 @@ import m78exercices.composeapp.generated.resources.title
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun DiceRoller(){
+fun DiceRoller() {
+    // NOTA: guarda int
     val dice = listOf(
-        Res.drawable.dice_1,
-        Res.drawable.dice_2,
-        Res.drawable.dice_3,
-        Res.drawable.dice_4,
-        Res.drawable.dice_5,
-        Res.drawable.dice_6
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
     )
     var randomDice = remember { mutableStateOf(dice.random()) }
     var randomDice2 = remember { mutableStateOf(dice.random()) }
     var roll by remember { mutableStateOf(false) }
-    var jackpotText = remember { mutableStateOf("") }
-    //Background Image
-    Box(modifier = Modifier.fillMaxSize()){
-        Image(
-            painter = painterResource(Res.drawable.tapestry),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier.matchParentSize()
-        )
-    }
-    Column(modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,) {
-        Image(
-            painter = painterResource(Res.drawable.title),
-            contentDescription = null,
-        )
-        Button(onClick = {
-            roll = true
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-        } ){
-            Text("Roll the dice")
-        }
-        Row(){
-            if (roll){
-                randomDice.value = dice.random()
-                randomDice2.value =  dice.random()
-                if (randomDice.value == Res.drawable.dice_6 && randomDice2.value == Res.drawable.dice_6){
-                    jackpotText.value = "JACKPOT!"
-                }else {
-                    jackpotText.value = ""
-                }
-                roll = false
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState)
+            },
+        ){ padding ->
+            //Background Image
+            Box(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    painter = painterResource(Res.drawable.tapestry),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.matchParentSize()
+                )
             }
-            Image(painter = painterResource(randomDice.value), contentDescription = null)
-            Image(painter = painterResource(randomDice2.value), contentDescription = null)
-        }
-        Text(jackpotText.value)
-    }
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.title),
+                    contentDescription = null,
+                )
+                Button(onClick = {
+                    roll = true
+                    randomDice.value = dice.random()
+                    randomDice2.value = dice.random()
 
+                    if(randomDice.value == 6 && randomDice2.value == 6){
+                        scope.launch {
+                            snackbarHostState.showSnackbar("JACKPOT")
+                        }
+
+                    }
+
+                }) {
+                    Text("Roll the dice")
+
+                }
+                Row() {
+                    when(randomDice){
+                        1 -> Res.drawable.dice_1,
+                        2 -> Res.drawable.dice_2,
+                        else ->{
+                            Res.drawable.dice_1
+                        }
+                    }
+                    Image(painter = painterResource(randomDice.value), contentDescription = null)
+                    Image(painter = painterResource(randomDice2.value), contentDescription = null)
+                }
+        }
+    }
 }
