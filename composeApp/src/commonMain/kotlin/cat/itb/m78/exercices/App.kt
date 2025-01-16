@@ -16,10 +16,11 @@ import cat.itb.m78.exercices.Stateless.ContactMethod
 import cat.itb.m78.exercices.Stateless.MessagesList
 import cat.itb.m78.exercices.Stateless.Resource
 import cat.itb.m78.exercices.Stateless.Welcome
+import cat.itb.m78.exercices.ViewModel.ProgramCounter
 import cat.itb.m78.exercices.theme.AppTheme
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
 
 @Composable
 internal fun App() = AppTheme {
-    DiceRoller()
+    ProgramCounter()
 }

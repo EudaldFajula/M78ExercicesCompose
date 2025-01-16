@@ -21,7 +21,6 @@ fun SecretNumberMethod(){
     var text by remember { mutableStateOf("") }
     var secretNum = remember { (1..100).random()}
     var textHints = remember{ mutableStateOf(" ")}
-    var showHint by remember { mutableStateOf(false) }
     var tries = remember { mutableStateOf(0) }
     Column(modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,){
@@ -32,25 +31,19 @@ fun SecretNumberMethod(){
                 text = it
             })
         Button(onClick = {
-            showHint = true
             tries.value++
+            if (text.toInt() == secretNum){
+                textHints.value = "Has encertat!"
+            }else if (text.toInt() < secretNum){
+                textHints.value = "El número que busques és més gran"
+            }else{
+                textHints.value = "El número que busques és més petit"
+            }
         } ){
             Text("Validar")
         }
         Text("Intents: " + tries.value)
         Text(textHints.value)
-        if (showHint){
-            if (text.toInt() == secretNum){
-                textHints.value = "Has encertat!"
-                showHint = false
-            }else if (text.toInt() < secretNum){
-                textHints.value = "El número que busques és més gran"
-                showHint = false
-            }else{
-                textHints.value = "El número que busques és més petit"
-                showHint = false
-            }
-        }
 
     }
 }

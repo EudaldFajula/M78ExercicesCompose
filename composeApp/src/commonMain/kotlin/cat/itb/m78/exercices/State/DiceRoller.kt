@@ -50,70 +50,67 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun DiceRoller() {
     // NOTA: guarda int
-    val dice = listOf(
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-    )
-    var randomDice = remember { mutableStateOf(dice.random()) }
-    var randomDice2 = remember { mutableStateOf(dice.random()) }
-    var roll by remember { mutableStateOf(false) }
+    val dice = 1..6
+    var randomDice by remember { mutableStateOf(dice.random()) }
+    var randomDice2 by remember { mutableStateOf(dice.random()) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-        Scaffold(
-            snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState)
-            },
-        ){ padding ->
-            //Background Image
-            Box(modifier = Modifier.fillMaxSize()) {
-                Image(
-                    painter = painterResource(Res.drawable.tapestry),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.matchParentSize()
-                )
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+    ) { padding ->
+        //Background Image
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(Res.drawable.tapestry),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier.matchParentSize()
+            )
+        }
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.title),
+                contentDescription = null,
+            )
+            Button(onClick = {
+                randomDice = dice.random()
+                randomDice2 = dice.random()
+                if (randomDice == 6 && randomDice2 == 6) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar("JACKPOT!!")
+                    }
+                }
+            }) {
+                Text("Roll the dice")
+
             }
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Image(
-                    painter = painterResource(Res.drawable.title),
-                    contentDescription = null,
-                )
-                Button(onClick = {
-                    roll = true
-                    randomDice.value = dice.random()
-                    randomDice2.value = dice.random()
-
-                    if(randomDice.value == 6 && randomDice2.value == 6){
-                        scope.launch {
-                            snackbarHostState.showSnackbar("JACKPOT")
-                        }
-
-                    }
-
-                }) {
-                    Text("Roll the dice")
-
-                }
-                Row() {
-                    when(randomDice){
-                        1 -> Res.drawable.dice_1,
-                        2 -> Res.drawable.dice_2,
-                        else ->{
-                            Res.drawable.dice_1
-                        }
-                    }
-                    Image(painter = painterResource(randomDice.value), contentDescription = null)
-                    Image(painter = painterResource(randomDice2.value), contentDescription = null)
-                }
+            Row() {
+                ShowDice(randomDice)
+                ShowDice(randomDice2)
+            }
         }
     }
+}
+
+@Composable
+fun ShowDice(value: Int) {
+    when (value) {
+        1 -> Image(painter = painterResource(Res.drawable.dice_1), contentDescription = null)
+        2 -> Image(painter = painterResource(Res.drawable.dice_2), contentDescription = null)
+        3 -> Image(painter = painterResource(Res.drawable.dice_3), contentDescription = null)
+        4 -> Image(painter = painterResource(Res.drawable.dice_4), contentDescription = null)
+        5 -> Image(painter = painterResource(Res.drawable.dice_5), contentDescription = null)
+        6 -> Image(painter = painterResource(Res.drawable.dice_6), contentDescription = null)
+        else -> {
+            Image(painter = painterResource(Res.drawable.dice_1), contentDescription = null)
+        }
+    }
+
 }
