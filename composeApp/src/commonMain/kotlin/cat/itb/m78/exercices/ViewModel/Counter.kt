@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 class ViewModelCounter : ViewModel(){
-    var text = mutableStateOf(0)
+    val text = mutableStateOf(0)
     var text2 = mutableStateOf(0)
     fun PointsPlus1(){
         text.value++
