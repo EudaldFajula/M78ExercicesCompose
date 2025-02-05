@@ -933,7 +933,7 @@ object TrivialScreen {
     @Serializable
     data object GameScreen
     @Serializable
-    data class EndScreen(val message: String)
+    data object EndScreen
 }
 
 class viewModelTrivial : ViewModel(){
@@ -977,9 +977,10 @@ fun NavLivTrivial(){
                 navigateToEndScreen = {navController.navigate(TrivialScreen.EndScreen)}
             )
         }
-        composable<TrivialScreen.EndScreen> { backStack ->
-            val message = backStack.toRoute<TrivialScreen.EndScreen>().message
-            Screen3(message){ navController.navigate(TrivialScreen.EndScreen) }
+        composable<TrivialScreen.EndScreen> {
+            EndScreen(
+                navigateToGameScreen = {navController.navigate(TrivialScreen.MenuScreen)}
+            )
         }
     }
 }
@@ -1027,8 +1028,26 @@ fun GameScreen(navigateToEndScreen: () -> Unit){
         questionText = mathsQuestions.random().question
     }
     Column() {
-        Text()
+        Row() {
+            Text("Dificultat: " + viewModel.difficulty.value)
+
+        }
+        Row(){
+            Text(questionText)
+        }
+        Row(){
+            Button(onClick = navigateToEndScreen){
+                Text(mathsQuestions.random().correctAnswer1)
+            }
+            Button(onClick = navigateToEndScreen){
+                Text(mathsQuestions.random().answer2)
+            }
+        }
     }
 }
-
-
+@Composable
+fun EndScreen(navigateToGameScreen: () -> Unit){
+    Button(onClick = navigateToGameScreen){
+        Text("Adiooos")
+    }
+}
