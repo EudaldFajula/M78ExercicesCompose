@@ -5,6 +5,7 @@ package cat.itb.m78.exercices.PracticaTrivial
 import androidx.collection.mutableIntSetOf
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -38,15 +40,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import cat.itb.m78.exercices.Navegacio.Destination
 import cat.itb.m78.exercices.Navegacio.Screen3
 import cat.itb.m78.exercices.Navegacio.ViewModelTicTacToe
 import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 import m78exercices.composeapp.generated.resources.Res
 import m78exercices.composeapp.generated.resources.Trivial
 import org.jetbrains.compose.resources.painterResource
+import kotlin.random.Random
 
-data class Question(val question: String, val correctAnswer: String, val answer2: String, val answer3: String, val answer4: String)
+data class Question(var question: String, val correctAnswer: String, val answer2: String, val answer3: String, val answer4: String)
 
 //Sport questions
 object SportEasyQuestions {
@@ -220,11 +225,11 @@ object TrivialScreen {
     @Serializable
     data object SettingsScreen
     @Serializable
-    data object GameScreen
+    data class GameScreen(val type: TypeQuestions)
     @Serializable
     data object ChooseTypeScreen
     @Serializable
-    data object EndScreen
+    data class EndScreen(val score: Int)
 }
 enum class Difficulty{
     EASY, MEDIUM, DIFFICULT
@@ -234,15 +239,204 @@ enum class TypeQuestions{
 }
 class ViewModelTrivial : ViewModel(){
     val score = mutableStateOf(0)
+    val totalRounds = mutableStateOf(0)
+    val maxRounds = mutableStateOf(5)
     val difficulty = mutableStateOf<Difficulty>(Difficulty.EASY)
     val timeLeft =  mutableStateOf(60)
-    val typeGameMode = mutableStateOf<TypeQuestions>(TypeQuestions.MUSIC)
+    val typeGameMode = mutableStateOf<TypeQuestions>(TypeQuestions.MATH)
+    val questionText = mutableStateOf<Question>(Question("","","","",""))
     fun timeMinus(){
         timeLeft.value--
+    }
+    fun correctAnswer(){
+        score.value++
+    }
+    fun nextRound(){
+        totalRounds.value++
     }
     fun changeType(type: TypeQuestions){
         typeGameMode.value = type
     }
+    fun changeMaxRounds(){
+        maxRounds.value = when (difficulty.value){
+            Difficulty.EASY -> 5
+            Difficulty.MEDIUM -> 10
+            Difficulty.DIFFICULT -> 15
+        }
+    }
+    fun changeQuestion(type: TypeQuestions){
+        changeType(TypeQuestions.MATH)
+        when (difficulty.value){
+            Difficulty.EASY -> when (typeGameMode.value){
+                TypeQuestions.MATH -> questionText.value = mathEasyQuestionsList.random()
+                TypeQuestions.SPORT -> questionText.value = sportsEasyQuestionsList.random()
+                TypeQuestions.MUSIC -> questionText.value = musicEasyQuestionsList.random()
+            }
+            Difficulty.MEDIUM -> when (typeGameMode.value){
+                TypeQuestions.MATH -> questionText.value = mathIntermediateQuestionsList.random()
+                TypeQuestions.SPORT -> questionText.value = sportsIntermediateQuestionsList.random()
+                TypeQuestions.MUSIC -> questionText.value = musicIntermediateQuestionsList.random()
+            }
+            Difficulty.DIFFICULT -> when (typeGameMode.value){
+                TypeQuestions.MATH -> questionText.value = mathDifficultQuestionsList.random()
+                TypeQuestions.SPORT -> questionText.value = sportsDifficultQuestionsList.random()
+                TypeQuestions.MUSIC -> questionText.value = musicDifficultQuestionsList.random()
+            }
+        }
+    }
+    private val mathEasyQuestionsList = listOf(
+        MathEasyQuestions.question1,
+        MathEasyQuestions.question2,
+        MathEasyQuestions.question3,
+        MathEasyQuestions.question4,
+        MathEasyQuestions.question5,
+        MathEasyQuestions.question6,
+        MathEasyQuestions.question7,
+        MathEasyQuestions.question8,
+        MathEasyQuestions.question9,
+        MathEasyQuestions.question10,
+        MathEasyQuestions.question11,
+        MathEasyQuestions.question12,
+        MathEasyQuestions.question13,
+        MathEasyQuestions.question14,
+        MathEasyQuestions.question15
+    )
+    private val mathIntermediateQuestionsList = listOf(
+        MathIntermediateQuestions.question1,
+        MathIntermediateQuestions.question2,
+        MathIntermediateQuestions.question3,
+        MathIntermediateQuestions.question4,
+        MathIntermediateQuestions.question5,
+        MathIntermediateQuestions.question6,
+        MathIntermediateQuestions.question7,
+        MathIntermediateQuestions.question8,
+        MathIntermediateQuestions.question9,
+        MathIntermediateQuestions.question10,
+        MathIntermediateQuestions.question11,
+        MathIntermediateQuestions.question12,
+        MathIntermediateQuestions.question13,
+        MathIntermediateQuestions.question14,
+        MathIntermediateQuestions.question15,
+    )
+    private val mathDifficultQuestionsList = listOf(
+        MathDifficultQuestions.question1,
+        MathDifficultQuestions.question2,
+        MathDifficultQuestions.question3,
+        MathDifficultQuestions.question4,
+        MathDifficultQuestions.question5,
+        MathDifficultQuestions.question6,
+        MathDifficultQuestions.question7,
+        MathDifficultQuestions.question8,
+        MathDifficultQuestions.question9,
+        MathDifficultQuestions.question10,
+        MathDifficultQuestions.question11,
+        MathDifficultQuestions.question12,
+        MathDifficultQuestions.question13,
+        MathDifficultQuestions.question14,
+        MathDifficultQuestions.question15,
+    )
+    private val sportsEasyQuestionsList = listOf(
+        SportEasyQuestions.question1,
+        SportEasyQuestions.question2,
+        SportEasyQuestions.question3,
+        SportEasyQuestions.question4,
+        SportEasyQuestions.question5,
+        SportEasyQuestions.question6,
+        SportEasyQuestions.question7,
+        SportEasyQuestions.question8,
+        SportEasyQuestions.question9,
+        SportEasyQuestions.question10,
+        SportEasyQuestions.question11,
+        SportEasyQuestions.question12,
+        SportEasyQuestions.question13,
+        SportEasyQuestions.question14,
+        SportEasyQuestions.question15,
+    )
+    private val sportsIntermediateQuestionsList = listOf(
+        SportIntermediateQuestions.question1,
+        SportIntermediateQuestions.question2,
+        SportIntermediateQuestions.question3,
+        SportIntermediateQuestions.question4,
+        SportIntermediateQuestions.question5,
+        SportIntermediateQuestions.question6,
+        SportIntermediateQuestions.question7,
+        SportIntermediateQuestions.question8,
+        SportIntermediateQuestions.question9,
+        SportIntermediateQuestions.question10,
+        SportIntermediateQuestions.question11,
+        SportIntermediateQuestions.question12,
+        SportIntermediateQuestions.question13,
+        SportIntermediateQuestions.question14,
+        SportIntermediateQuestions.question15,
+    )
+    private val sportsDifficultQuestionsList = listOf(
+        SportDifficultQuestions.question1,
+        SportDifficultQuestions.question2,
+        SportDifficultQuestions.question3,
+        SportDifficultQuestions.question4,
+        SportDifficultQuestions.question5,
+        SportDifficultQuestions.question6,
+        SportDifficultQuestions.question7,
+        SportDifficultQuestions.question8,
+        SportDifficultQuestions.question9,
+        SportDifficultQuestions.question10,
+        SportDifficultQuestions.question11,
+        SportDifficultQuestions.question12,
+        SportDifficultQuestions.question13,
+        SportDifficultQuestions.question14,
+        SportDifficultQuestions.question15,
+    )
+    private val musicEasyQuestionsList = listOf(
+        MusicEasyQuestions.question1,
+        MusicEasyQuestions.question2,
+        MusicEasyQuestions.question3,
+        MusicEasyQuestions.question4,
+        MusicEasyQuestions.question5,
+        MusicEasyQuestions.question6,
+        MusicEasyQuestions.question7,
+        MusicEasyQuestions.question8,
+        MusicEasyQuestions.question9,
+        MusicEasyQuestions.question10,
+        MusicEasyQuestions.question11,
+        MusicEasyQuestions.question12,
+        MusicEasyQuestions.question13,
+        MusicEasyQuestions.question14,
+        MusicEasyQuestions.question15,
+    )
+    private val musicIntermediateQuestionsList = listOf(
+        MusicIntermediateQuestions.question1,
+        MusicIntermediateQuestions.question2,
+        MusicIntermediateQuestions.question3,
+        MusicIntermediateQuestions.question4,
+        MusicIntermediateQuestions.question5,
+        MusicIntermediateQuestions.question6,
+        MusicIntermediateQuestions.question7,
+        MusicIntermediateQuestions.question8,
+        MusicIntermediateQuestions.question9,
+        MusicIntermediateQuestions.question10,
+        MusicIntermediateQuestions.question11,
+        MusicIntermediateQuestions.question12,
+        MusicIntermediateQuestions.question13,
+        MusicIntermediateQuestions.question14,
+        MusicIntermediateQuestions.question15,
+    )
+    private val musicDifficultQuestionsList = listOf(
+        MusicDifficultQuestions.question1,
+        MusicDifficultQuestions.question2,
+        MusicDifficultQuestions.question3,
+        MusicDifficultQuestions.question4,
+        MusicDifficultQuestions.question5,
+        MusicDifficultQuestions.question6,
+        MusicDifficultQuestions.question7,
+        MusicDifficultQuestions.question8,
+        MusicDifficultQuestions.question9,
+        MusicDifficultQuestions.question10,
+        MusicDifficultQuestions.question11,
+        MusicDifficultQuestions.question12,
+        MusicDifficultQuestions.question13,
+        MusicDifficultQuestions.question14,
+        MusicDifficultQuestions.question15,
+    )
 }
 
 @Composable
@@ -264,7 +458,7 @@ fun NavLivTrivial(){
         composable<TrivialScreen.MenuScreen>{
             MenuScreen(
                 navigateToSettingsScreen = { navController.navigate(TrivialScreen.SettingsScreen) },
-                navigateToChooseTypeScreen = { navController.navigate(TrivialScreen.ChooseTypeScreen) }
+                navigateToChooseTypeScreen = { navController.navigate(TrivialScreen.ChooseTypeScreen) },
             )
         }
         composable<TrivialScreen.SettingsScreen>{
@@ -274,16 +468,22 @@ fun NavLivTrivial(){
         }
         composable<TrivialScreen.ChooseTypeScreen>{
             ChooseTypeScreen(
-                navigateToGameScreen = {navController.navigate(TrivialScreen.GameScreen)},
+                navigateToGameScreen = {navController.navigate(TrivialScreen.GameScreen(it))},
             )
         }
         composable<TrivialScreen.GameScreen>{
+            backStack ->
+            val type = backStack.toRoute<TrivialScreen.GameScreen>().type
             GameScreen(
-                navigateToEndScreen = {navController.navigate(TrivialScreen.EndScreen)}
+                type,
+                navigateToEndScreen = {navController.navigate(TrivialScreen.EndScreen(it))}
             )
         }
         composable<TrivialScreen.EndScreen> {
+            backStack ->
+            val score = backStack.toRoute<TrivialScreen.EndScreen>().score
             EndScreen(
+                score,
                 navigateToGameScreen = {navController.navigate(TrivialScreen.MenuScreen)}
             )
         }
@@ -292,7 +492,7 @@ fun NavLivTrivial(){
 
 @Composable
 fun MenuScreen(navigateToChooseTypeScreen: () -> Unit, navigateToSettingsScreen: () -> Unit){
-    Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp),
+    Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),
         horizontalAlignment = Alignment.CenterHorizontally){
         Image(painter = painterResource(Res.drawable.Trivial), contentDescription = null)
         Button(onClick = navigateToChooseTypeScreen){
@@ -306,76 +506,69 @@ fun MenuScreen(navigateToChooseTypeScreen: () -> Unit, navigateToSettingsScreen:
 
 @Composable
 fun SettingsScreen(navigateToMenuScreen: () -> Unit){
-    Column() {
+    val viewModel = viewModel { ViewModelTrivial() }
+    Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
         Row() {
             Text("Dificultad")
-
+            Button(onClick = {navigateToMenuScreen(); viewModel.changeMaxRounds()}){
+                Text("Volver Menu")
+            }
         }
     }
 }
 
 @Composable
-fun ChooseTypeScreen(navigateToGameScreen: () -> Unit){
+fun ChooseTypeScreen(navigateToGameScreen: (type) -> Unit){
     val viewModel = viewModel { ViewModelTrivial() }
-    Column {
-        Button(onClick = {viewModel.changeType(TypeQuestions.SPORT); navigateToGameScreen()}) {
+    Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
+        Button(onClick = {viewModel.changeType(TypeQuestions.SPORT); navigateToGameScreen(); viewModel.changeQuestion()}) {
             Text("Preguntas sobre deporte")
         }
-        Button(onClick = {viewModel.changeType(TypeQuestions.MUSIC); navigateToGameScreen()}) {
+        Button(onClick = {viewModel.changeType(TypeQuestions.MUSIC); navigateToGameScreen(); viewModel.changeQuestion()}) {
             Text("Preguntas sobre musica")
         }
-        Button(onClick = {viewModel.changeType(TypeQuestions.MATH); navigateToGameScreen()}) {
+        Button(onClick = {viewModel.changeType(TypeQuestions.MATH); navigateToGameScreen(); viewModel.changeQuestion()}) {
             Text("Preguntas sobre matematicas")
         }
     }
 }
 
 @Composable
-fun GameScreen(navigateToEndScreen: () -> Unit){
+fun GameScreen(type: TypeQuestions, navigateToEndScreen: (Int) -> Unit){
     val viewModel = viewModel { ViewModelTrivial() }
-    val questionText = mutableStateOf("")
-    val answer1 = mutableStateOf("")
-    val answer2 = mutableStateOf("")
-    val answer3 = mutableStateOf("")
-    val answer4 = mutableStateOf("")
-    questionText.value = when (viewModel.difficulty.value){
-        Difficulty.EASY -> when(viewModel.typeGameMode.value){
-            TypeQuestions.SPORT ->  SportEasyQuestions.question1.question
-            TypeQuestions.MATH ->  MathEasyQuestions.question1.question
-            TypeQuestions.MUSIC ->  MusicEasyQuestions.question1.question
-        }
-        Difficulty.MEDIUM -> when(viewModel.typeGameMode.value){
-            TypeQuestions.SPORT ->  SportIntermediateQuestions.question1.question
-            TypeQuestions.MATH ->  MathIntermediateQuestions.question1.question
-            TypeQuestions.MUSIC ->  MusicIntermediateQuestions.question1.question
-        }
-        Difficulty.DIFFICULT -> when(viewModel.typeGameMode.value){
-            TypeQuestions.SPORT ->  SportDifficultQuestions.question1.question
-            TypeQuestions.MATH ->  MathDifficultQuestions.question1.question
-            TypeQuestions.MUSIC ->  MusicDifficultQuestions.question1.question
-        }
-    }
-    Column() {
+    Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
         Row() {
-            Text("Dificultad: " + viewModel.difficulty.value)
+            Text(viewModel.totalRounds.value.toString() + " / " + viewModel.maxRounds.value.toString())
         }
         Row(){
-            Text(questionText.value)
+            Text(viewModel.questionText.value.question)
         }
         Row(){
-            Button(onClick = navigateToEndScreen){
-                Text(SportEasyQuestions.question1.correctAnswer)
+            Button(onClick = {viewModel.nextRound(); viewModel.correctAnswer(); viewModel.changeQuestion();
+                if (viewModel.totalRounds.value == viewModel.maxRounds.value){
+                    navigateToEndScreen(viewModel.score.value)
+                }}){
+                Text(viewModel.questionText.value.correctAnswer)
             }
-            Button(onClick = navigateToEndScreen){
-                Text(SportEasyQuestions.question1.answer2)
+            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion();
+                if (viewModel.totalRounds.value == viewModel.maxRounds.value){
+                    navigateToEndScreen(viewModel.score.value)
+                }}){
+                Text(viewModel.questionText.value.answer2)
             }
         }
         Row(){
-            Button(onClick = navigateToEndScreen) {
-                Text(SportEasyQuestions.question1.answer3)
+            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion();
+                if (viewModel.totalRounds.value == viewModel.maxRounds.value){
+                    navigateToEndScreen(viewModel.score.value)
+                }}) {
+                Text(viewModel.questionText.value.answer3)
             }
-            Button(onClick = navigateToEndScreen) {
-                Text(SportEasyQuestions.question1.answer4)
+            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion();
+                if (viewModel.totalRounds.value == viewModel.maxRounds.value){
+                    navigateToEndScreen(viewModel.score.value)
+                }}) {
+                Text(viewModel.questionText.value.answer4)
             }
         }
     }
@@ -383,8 +576,13 @@ fun GameScreen(navigateToEndScreen: () -> Unit){
 
 
 @Composable
-fun EndScreen(navigateToGameScreen: () -> Unit){
-    Button(onClick = navigateToGameScreen){
-        Text("Adiooos")
+fun EndScreen(score: Int,navigateToGameScreen: () -> Unit){
+    val viewModel = viewModel { ViewModelTrivial() }
+    Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Puntuacion: ")
+        Text(score.toString() + " / " + viewModel.maxRounds.value.toString())
+        Button(onClick = navigateToGameScreen){
+            Text("Adiooos")
+        }
     }
 }
