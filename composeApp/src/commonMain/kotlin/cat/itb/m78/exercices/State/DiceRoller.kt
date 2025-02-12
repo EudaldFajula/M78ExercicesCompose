@@ -41,7 +41,7 @@ import m78exercices.composeapp.generated.resources.dice_3
 import m78exercices.composeapp.generated.resources.dice_4
 import m78exercices.composeapp.generated.resources.dice_5
 import m78exercices.composeapp.generated.resources.dice_6
-import m78exercices.composeapp.generated.resources.diceroller
+
 import m78exercices.composeapp.generated.resources.generatedFace
 import m78exercices.composeapp.generated.resources.tapestry
 import m78exercices.composeapp.generated.resources.title

@@ -1,38 +1,22 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+
 
 package cat.itb.m78.exercices.PracticaTrivial
 
-import androidx.collection.mutableIntSetOf
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,16 +24,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import cat.itb.m78.exercices.Navegacio.Destination
-import cat.itb.m78.exercices.Navegacio.Screen3
-import cat.itb.m78.exercices.Navegacio.ViewModelTicTacToe
 import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 import m78exercices.composeapp.generated.resources.Res
 import m78exercices.composeapp.generated.resources.Trivial
 import org.jetbrains.compose.resources.painterResource
-import kotlin.random.Random
 
 data class Question(var question: String, val correctAnswer: String, val answer2: String, val answer3: String, val answer4: String)
 
@@ -229,7 +208,7 @@ object TrivialScreen {
     @Serializable
     data object ChooseTypeScreen
     @Serializable
-    data class EndScreen(val score: Int)
+    data class EndScreen(val score: Int, val totalRounds: Int)
 }
 enum class Difficulty{
     EASY, MEDIUM, DIFFICULT
@@ -473,17 +452,23 @@ fun NavLivTrivial(){
         }
         composable<TrivialScreen.GameScreen>{
             backStack ->
-            val type = backStack.toRoute<TrivialScreen.GameScreen>().type
+            val type: TypeQuestions = backStack.toRoute<TrivialScreen.GameScreen>().type
+            //Cuando lo pase lo hago string
+            val s = TypeQuestions.MATH.toString()
+            //Para hacerlo enum
+            TypeQuestions.valueOf(s)
             GameScreen(
                 type,
-                navigateToEndScreen = {navController.navigate(TrivialScreen.EndScreen(it))}
+                navigateToEndScreen = { score, totalRounds -> navController.navigate(TrivialScreen.EndScreen(score, totalRounds))}
             )
         }
         composable<TrivialScreen.EndScreen> {
             backStack ->
             val score = backStack.toRoute<TrivialScreen.EndScreen>().score
+            val totalRounds = backStack.toRoute<TrivialScreen.EndScreen>().totalRounds
             EndScreen(
                 score,
+                totalRounds,
                 navigateToGameScreen = {navController.navigate(TrivialScreen.MenuScreen)}
             )
         }
@@ -518,23 +503,23 @@ fun SettingsScreen(navigateToMenuScreen: () -> Unit){
 }
 
 @Composable
-fun ChooseTypeScreen(navigateToGameScreen: (type) -> Unit){
+fun ChooseTypeScreen(navigateToGameScreen: (TypeQuestions) -> Unit){
     val viewModel = viewModel { ViewModelTrivial() }
     Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
-        Button(onClick = {viewModel.changeType(TypeQuestions.SPORT); navigateToGameScreen(); viewModel.changeQuestion()}) {
+        Button(onClick = {viewModel.changeType(TypeQuestions.SPORT); navigateToGameScreen(TypeQuestions.SPORT); }) {
             Text("Preguntas sobre deporte")
         }
-        Button(onClick = {viewModel.changeType(TypeQuestions.MUSIC); navigateToGameScreen(); viewModel.changeQuestion()}) {
+        Button(onClick = {viewModel.changeType(TypeQuestions.MUSIC); navigateToGameScreen(TypeQuestions.MUSIC); }) {
             Text("Preguntas sobre musica")
         }
-        Button(onClick = {viewModel.changeType(TypeQuestions.MATH); navigateToGameScreen(); viewModel.changeQuestion()}) {
+        Button(onClick = {viewModel.changeType(TypeQuestions.MATH); navigateToGameScreen(TypeQuestions.MATH); }) {
             Text("Preguntas sobre matematicas")
         }
     }
 }
 
 @Composable
-fun GameScreen(type: TypeQuestions, navigateToEndScreen: (Int) -> Unit){
+fun GameScreen(type: TypeQuestions, navigateToEndScreen: (Int, Int) -> Unit){
     val viewModel = viewModel { ViewModelTrivial() }
     Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
         Row() {
@@ -544,29 +529,29 @@ fun GameScreen(type: TypeQuestions, navigateToEndScreen: (Int) -> Unit){
             Text(viewModel.questionText.value.question)
         }
         Row(){
-            Button(onClick = {viewModel.nextRound(); viewModel.correctAnswer(); viewModel.changeQuestion();
+            Button(onClick = {viewModel.nextRound(); viewModel.correctAnswer(); viewModel.changeQuestion(type);
                 if (viewModel.totalRounds.value == viewModel.maxRounds.value){
-                    navigateToEndScreen(viewModel.score.value)
+                    navigateToEndScreen(viewModel.score.value, viewModel.maxRounds.value)
                 }}){
                 Text(viewModel.questionText.value.correctAnswer)
             }
-            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion();
+            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion(type);
                 if (viewModel.totalRounds.value == viewModel.maxRounds.value){
-                    navigateToEndScreen(viewModel.score.value)
+                    navigateToEndScreen(viewModel.score.value, viewModel.maxRounds.value)
                 }}){
                 Text(viewModel.questionText.value.answer2)
             }
         }
         Row(){
-            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion();
+            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion(type);
                 if (viewModel.totalRounds.value == viewModel.maxRounds.value){
-                    navigateToEndScreen(viewModel.score.value)
+                    navigateToEndScreen(viewModel.score.value, viewModel.maxRounds.value)
                 }}) {
                 Text(viewModel.questionText.value.answer3)
             }
-            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion();
+            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion(type);
                 if (viewModel.totalRounds.value == viewModel.maxRounds.value){
-                    navigateToEndScreen(viewModel.score.value)
+                    navigateToEndScreen(viewModel.score.value, viewModel.maxRounds.value)
                 }}) {
                 Text(viewModel.questionText.value.answer4)
             }
@@ -576,11 +561,10 @@ fun GameScreen(type: TypeQuestions, navigateToEndScreen: (Int) -> Unit){
 
 
 @Composable
-fun EndScreen(score: Int,navigateToGameScreen: () -> Unit){
-    val viewModel = viewModel { ViewModelTrivial() }
+fun EndScreen(score: Int, totalRounds: Int, navigateToGameScreen: () -> Unit){
     Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Puntuacion: ")
-        Text(score.toString() + " / " + viewModel.maxRounds.value.toString())
+        Text(score.toString() + " / " + totalRounds.toString())
         Button(onClick = navigateToGameScreen){
             Text("Adiooos")
         }
