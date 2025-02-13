@@ -1,35 +1,7 @@
-
-
 package cat.itb.m78.exercices.PracticaTrivial
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
-import kotlinx.coroutines.delay
-import kotlinx.serialization.Serializable
-import m78exercices.composeapp.generated.resources.Res
-import m78exercices.composeapp.generated.resources.Trivial
-import org.jetbrains.compose.resources.painterResource
-
 data class Question(var question: String, val correctAnswer: String, val answer2: String, val answer3: String, val answer4: String)
 
 //Sport questions
@@ -198,32 +170,14 @@ object MusicDifficultQuestions{
     val question15 = Question("¿Quién compuso la famosa ópera \"La Traviata\"?","Giuseppe Verdi","Richard Wagner","Wolfgang Amadeus Mozart","Giacomo Puccini")
 }
 
-object TrivialScreen {
-    @Serializable
-    data object MenuScreen
-    @Serializable
-    data object SettingsScreen
-    @Serializable
-    data class GameScreen(val type: TypeQuestions)
-    @Serializable
-    data object ChooseTypeScreen
-    @Serializable
-    data class EndScreen(val score: Int, val totalRounds: Int)
-}
-enum class Difficulty{
-    EASY, MEDIUM, DIFFICULT
-}
-enum class TypeQuestions{
-    SPORT,MUSIC,MATH
-}
 class ViewModelTrivial : ViewModel(){
+    val settings = TrivialSettingsManager.get()
     val score = mutableStateOf(0)
     val totalRounds = mutableStateOf(0)
-    val maxRounds = mutableStateOf(5)
-    val difficulty = mutableStateOf<Difficulty>(Difficulty.EASY)
     val timeLeft =  mutableStateOf(60)
-    val typeGameMode = mutableStateOf<TypeQuestions>(TypeQuestions.MATH)
     val questionText = mutableStateOf<Question>(Question("","","","",""))
+    val usage = mutableStateOf(false)
+
     fun timeMinus(){
         timeLeft.value--
     }
@@ -233,30 +187,19 @@ class ViewModelTrivial : ViewModel(){
     fun nextRound(){
         totalRounds.value++
     }
-    fun changeType(type: TypeQuestions){
-        typeGameMode.value = type
-    }
-    fun changeMaxRounds(){
-        maxRounds.value = when (difficulty.value){
-            Difficulty.EASY -> 5
-            Difficulty.MEDIUM -> 10
-            Difficulty.DIFFICULT -> 15
-        }
-    }
-    fun changeQuestion(type: TypeQuestions){
-        changeType(TypeQuestions.MATH)
-        when (difficulty.value){
-            Difficulty.EASY -> when (typeGameMode.value){
+    fun changeQuestion(){
+        when (settings.difficulty){
+            Difficulty.EASY -> when (settings.subject){
                 TypeQuestions.MATH -> questionText.value = mathEasyQuestionsList.random()
                 TypeQuestions.SPORT -> questionText.value = sportsEasyQuestionsList.random()
                 TypeQuestions.MUSIC -> questionText.value = musicEasyQuestionsList.random()
             }
-            Difficulty.MEDIUM -> when (typeGameMode.value){
+            Difficulty.MEDIUM -> when (settings.subject){
                 TypeQuestions.MATH -> questionText.value = mathIntermediateQuestionsList.random()
                 TypeQuestions.SPORT -> questionText.value = sportsIntermediateQuestionsList.random()
                 TypeQuestions.MUSIC -> questionText.value = musicIntermediateQuestionsList.random()
             }
-            Difficulty.DIFFICULT -> when (typeGameMode.value){
+            Difficulty.DIFFICULT -> when (settings.subject){
                 TypeQuestions.MATH -> questionText.value = mathDifficultQuestionsList.random()
                 TypeQuestions.SPORT -> questionText.value = sportsDifficultQuestionsList.random()
                 TypeQuestions.MUSIC -> questionText.value = musicDifficultQuestionsList.random()
@@ -416,157 +359,4 @@ class ViewModelTrivial : ViewModel(){
         MusicDifficultQuestions.question14,
         MusicDifficultQuestions.question15,
     )
-}
-
-@Composable
-fun BasicCountdownTimer() {
-    val viewModel = viewModel { ViewModelTrivial() }
-    LaunchedEffect(key1 = viewModel.timeLeft.value) {
-        while (viewModel.timeLeft.value > 0) {
-            delay(1000L)
-            viewModel.timeMinus()
-        }
-    }
-    Text(text = viewModel.timeLeft.value.toString())
-}
-
-@Composable
-fun NavLivTrivial(){
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = TrivialScreen.MenuScreen){
-        composable<TrivialScreen.MenuScreen>{
-            MenuScreen(
-                navigateToSettingsScreen = { navController.navigate(TrivialScreen.SettingsScreen) },
-                navigateToChooseTypeScreen = { navController.navigate(TrivialScreen.ChooseTypeScreen) },
-            )
-        }
-        composable<TrivialScreen.SettingsScreen>{
-            SettingsScreen(
-                navigateToMenuScreen = { navController.navigate(TrivialScreen.MenuScreen) }
-            )
-        }
-        composable<TrivialScreen.ChooseTypeScreen>{
-            ChooseTypeScreen(
-                navigateToGameScreen = {navController.navigate(TrivialScreen.GameScreen(it))},
-            )
-        }
-        composable<TrivialScreen.GameScreen>{
-            backStack ->
-            val type: TypeQuestions = backStack.toRoute<TrivialScreen.GameScreen>().type
-            //Cuando lo pase lo hago string
-            val s = TypeQuestions.MATH.toString()
-            //Para hacerlo enum
-            TypeQuestions.valueOf(s)
-            GameScreen(
-                type,
-                navigateToEndScreen = { score, totalRounds -> navController.navigate(TrivialScreen.EndScreen(score, totalRounds))}
-            )
-        }
-        composable<TrivialScreen.EndScreen> {
-            backStack ->
-            val score = backStack.toRoute<TrivialScreen.EndScreen>().score
-            val totalRounds = backStack.toRoute<TrivialScreen.EndScreen>().totalRounds
-            EndScreen(
-                score,
-                totalRounds,
-                navigateToGameScreen = {navController.navigate(TrivialScreen.MenuScreen)}
-            )
-        }
-    }
-}
-
-@Composable
-fun MenuScreen(navigateToChooseTypeScreen: () -> Unit, navigateToSettingsScreen: () -> Unit){
-    Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),
-        horizontalAlignment = Alignment.CenterHorizontally){
-        Image(painter = painterResource(Res.drawable.Trivial), contentDescription = null)
-        Button(onClick = navigateToChooseTypeScreen){
-            Text("New Game")
-        }
-        Button(onClick = navigateToSettingsScreen){
-            Text("Settings")
-        }
-    }
-}
-
-@Composable
-fun SettingsScreen(navigateToMenuScreen: () -> Unit){
-    val viewModel = viewModel { ViewModelTrivial() }
-    Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
-        Row() {
-            Text("Dificultad")
-            Button(onClick = {navigateToMenuScreen(); viewModel.changeMaxRounds()}){
-                Text("Volver Menu")
-            }
-        }
-    }
-}
-
-@Composable
-fun ChooseTypeScreen(navigateToGameScreen: (TypeQuestions) -> Unit){
-    val viewModel = viewModel { ViewModelTrivial() }
-    Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
-        Button(onClick = {viewModel.changeType(TypeQuestions.SPORT); navigateToGameScreen(TypeQuestions.SPORT); }) {
-            Text("Preguntas sobre deporte")
-        }
-        Button(onClick = {viewModel.changeType(TypeQuestions.MUSIC); navigateToGameScreen(TypeQuestions.MUSIC); }) {
-            Text("Preguntas sobre musica")
-        }
-        Button(onClick = {viewModel.changeType(TypeQuestions.MATH); navigateToGameScreen(TypeQuestions.MATH); }) {
-            Text("Preguntas sobre matematicas")
-        }
-    }
-}
-
-@Composable
-fun GameScreen(type: TypeQuestions, navigateToEndScreen: (Int, Int) -> Unit){
-    val viewModel = viewModel { ViewModelTrivial() }
-    Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
-        Row() {
-            Text(viewModel.totalRounds.value.toString() + " / " + viewModel.maxRounds.value.toString())
-        }
-        Row(){
-            Text(viewModel.questionText.value.question)
-        }
-        Row(){
-            Button(onClick = {viewModel.nextRound(); viewModel.correctAnswer(); viewModel.changeQuestion(type);
-                if (viewModel.totalRounds.value == viewModel.maxRounds.value){
-                    navigateToEndScreen(viewModel.score.value, viewModel.maxRounds.value)
-                }}){
-                Text(viewModel.questionText.value.correctAnswer)
-            }
-            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion(type);
-                if (viewModel.totalRounds.value == viewModel.maxRounds.value){
-                    navigateToEndScreen(viewModel.score.value, viewModel.maxRounds.value)
-                }}){
-                Text(viewModel.questionText.value.answer2)
-            }
-        }
-        Row(){
-            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion(type);
-                if (viewModel.totalRounds.value == viewModel.maxRounds.value){
-                    navigateToEndScreen(viewModel.score.value, viewModel.maxRounds.value)
-                }}) {
-                Text(viewModel.questionText.value.answer3)
-            }
-            Button(onClick = {viewModel.nextRound(); viewModel.changeQuestion(type);
-                if (viewModel.totalRounds.value == viewModel.maxRounds.value){
-                    navigateToEndScreen(viewModel.score.value, viewModel.maxRounds.value)
-                }}) {
-                Text(viewModel.questionText.value.answer4)
-            }
-        }
-    }
-}
-
-
-@Composable
-fun EndScreen(score: Int, totalRounds: Int, navigateToGameScreen: () -> Unit){
-    Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Puntuacion: ")
-        Text(score.toString() + " / " + totalRounds.toString())
-        Button(onClick = navigateToGameScreen){
-            Text("Adiooos")
-        }
-    }
 }
