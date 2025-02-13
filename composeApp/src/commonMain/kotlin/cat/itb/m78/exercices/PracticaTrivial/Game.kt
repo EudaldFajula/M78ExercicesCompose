@@ -26,7 +26,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun GameScreen(navigateToEndScreen: (Int) -> Unit){
     val viewModel = viewModel {  ViewModelTrivial() }
-    GameScreenViewModel(navigateToEndScreen, viewModel::changeQuestion, viewModel::nextRound, viewModel.totalRounds.value, viewModel::timeMinus)
+    GameScreenViewModel(navigateToEndScreen, viewModel::changeQuestion, viewModel::nextRound, viewModel.totalRounds.value, viewModel::timeMinus, viewModel.timeLeft.value,viewModel.score.value, viewModel::correctAnswer, viewModel.questionText.value)
 }
 
 @Composable
@@ -42,8 +42,7 @@ fun CountDownScreen(timeLeft:Int, timeMinus: () -> Unit){
 }
 
 @Composable
-fun GameScreenViewModel(navigateToEndScreen: (Int) -> Unit, changeQuestion:()->Unit, nextRound:() ->Unit, totalRounds: Int, timeMinus: () -> Unit){
-    val viewModel = viewModel {  ViewModelTrivial() }
+fun GameScreenViewModel(navigateToEndScreen: (Int) -> Unit, changeQuestion:()->Unit, nextRound:() ->Unit, totalRounds: Int, timeMinus: () -> Unit, timeLeft: Int, score: Int, correctAnswer:()->Unit, questionText: Question){
     var usage = remember { mutableStateOf(false) }
     val maxRounds = TrivialSettingsManager.get().questionsPerGame
     if (!usage.value){
@@ -55,35 +54,35 @@ fun GameScreenViewModel(navigateToEndScreen: (Int) -> Unit, changeQuestion:()->U
             Text(totalRounds.toString() + " / " + maxRounds.toString())
         }
         Column(modifier = Modifier.padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally){
-            CountDownScreen(viewModel.timeLeft.value, timeMinus)
-            Text(viewModel.questionText.value.question)
+            CountDownScreen(timeLeft, timeMinus)
+            Text(questionText.question)
         }
         Row(){
-            Button(onClick = {nextRound(); viewModel.correctAnswer(); changeQuestion();
+            Button(onClick = {nextRound(); correctAnswer(); changeQuestion();
                 if (totalRounds == maxRounds){
-                    navigateToEndScreen(viewModel.score.value)
+                    navigateToEndScreen(score)
                 }}){
-                Text(viewModel.questionText.value.correctAnswer)
+                Text(questionText.correctAnswer)
             }
             Button(onClick = {nextRound(); changeQuestion();
                 if (totalRounds == maxRounds){
-                    navigateToEndScreen(viewModel.score.value)
+                    navigateToEndScreen(score)
                 }}){
-                Text(viewModel.questionText.value.answer2)
+                Text(questionText.answer2)
             }
         }
         Row(){
             Button(onClick = {nextRound(); changeQuestion();
                 if (totalRounds == maxRounds){
-                    navigateToEndScreen(viewModel.score.value)
+                    navigateToEndScreen(score)
                 }}) {
-                Text(viewModel.questionText.value.answer3)
+                Text(questionText.answer3)
             }
             Button(onClick = {nextRound(); changeQuestion();
                 if (totalRounds== maxRounds){
-                    navigateToEndScreen(viewModel.score.value)
+                    navigateToEndScreen(score)
                 }}) {
-                Text(viewModel.questionText.value.answer4)
+                Text(questionText.answer4)
             }
         }
     }

@@ -176,7 +176,6 @@ class ViewModelTrivial : ViewModel(){
     val totalRounds = mutableStateOf(0)
     val timeLeft =  mutableStateOf(60)
     val questionText = mutableStateOf<Question>(Question("","","","",""))
-    val usage = mutableStateOf(false)
 
     fun timeMinus(){
         timeLeft.value--
