@@ -174,7 +174,7 @@ class ViewModelTrivial : ViewModel(){
     val settings = TrivialSettingsManager.get()
     val score = mutableStateOf(0)
     val totalRounds = mutableStateOf(0)
-    val timeLeft =  mutableStateOf(60)
+    val timeLeft =  mutableStateOf(10)
     val questionText = mutableStateOf<Question>(Question("","","","",""))
 
     fun timeMinus(){

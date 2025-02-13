@@ -37,7 +37,7 @@ fun CountDownScreen(timeLeft:Int, timeMinus: () -> Unit){
         timeMinus()
     }
     Column{
-        Text("Time Left" + timeLeft.toString())
+        Text("Time Left: " + timeLeft.toString())
     }
 }
 
