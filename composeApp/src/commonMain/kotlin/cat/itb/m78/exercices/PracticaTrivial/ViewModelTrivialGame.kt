@@ -180,6 +180,9 @@ class ViewModelTrivial : ViewModel(){
     fun timeMinus(){
         timeLeft.value--
     }
+    fun resetTime(){
+        timeLeft.value = 10
+    }
     fun correctAnswer(){
         score.value++
     }

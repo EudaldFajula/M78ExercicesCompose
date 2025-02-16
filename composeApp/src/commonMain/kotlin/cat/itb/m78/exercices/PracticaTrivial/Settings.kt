@@ -52,11 +52,11 @@ data object TrivialSettingsManager{
 @Composable
 fun SettingsScreen(navigateToMenuScreen: () -> Unit) {
     val viewModel = viewModel { ViewModelTrivialSettings() }
-    SettingsScreenScreen(viewModel.maxRounds.value, viewModel::changeMaxRounds,viewModel.difficulty.value,viewModel::changeDifficulty, viewModel.typeQuestion.value, viewModel::changeSubjectQuestions, viewModel::saveSettings, navigateToMenuScreen)
+    SettingsScreenViewModel(viewModel.maxRounds.value, viewModel::changeMaxRounds,viewModel.difficulty.value,viewModel::changeDifficulty, viewModel.typeQuestion.value, viewModel::changeSubjectQuestions, viewModel::saveSettings, navigateToMenuScreen)
 }
 
 @Composable
-fun SettingsScreenScreen(rounds: Int, onRoundsChanged: (Int)-> Unit, difficulty: Difficulty, onDifficultyChanged: (Difficulty)->Unit, subject: TypeQuestions, onSubjectChanged: (TypeQuestions) -> Unit, onSave: ()-> Unit, navigateToMenuScreen : ()->Unit){
+fun SettingsScreenViewModel(rounds: Int, onRoundsChanged: (Int)-> Unit, difficulty: Difficulty, onDifficultyChanged: (Difficulty)->Unit, subject: TypeQuestions, onSubjectChanged: (TypeQuestions) -> Unit, onSave: ()-> Unit, navigateToMenuScreen : ()->Unit){
     Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
         Row() {
             Text("Numero Rondas:")
