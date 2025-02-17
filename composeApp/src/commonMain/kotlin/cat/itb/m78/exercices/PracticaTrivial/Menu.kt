@@ -23,10 +23,10 @@ fun MenuScreen(navigateToGameScreen: () -> Unit, navigateToSettingsScreen: () ->
         horizontalAlignment = Alignment.CenterHorizontally){
         Image(painter = painterResource(Res.drawable.Trivial), contentDescription = null, modifier = Modifier.size(400.dp))
         Button(onClick = navigateToGameScreen){
-            Text("New Game")
+            Text("Nueva partida")
         }
         Button(onClick = navigateToSettingsScreen){
-            Text("Settings")
+            Text("Configuración")
         }
     }
 }
