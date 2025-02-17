@@ -22,6 +22,7 @@ fun MenuScreen(navigateToGameScreen: () -> Unit, navigateToSettingsScreen: () ->
     Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),
         horizontalAlignment = Alignment.CenterHorizontally){
         Image(painter = painterResource(Res.drawable.Trivial), contentDescription = null, modifier = Modifier.size(400.dp))
+        Text("TRIVIAL GAME")
         Button(onClick = navigateToGameScreen){
             Text("Nueva partida")
         }

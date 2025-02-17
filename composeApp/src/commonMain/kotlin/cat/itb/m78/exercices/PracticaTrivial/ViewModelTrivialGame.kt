@@ -181,7 +181,7 @@ class ViewModelTrivial : ViewModel(){
         timeLeft.value--
     }
     fun resetTime(){
-        timeLeft.value = 10
+        timeLeft.value = settings.time
     }
     fun correctAnswer(){
         score.value++
