@@ -33,7 +33,8 @@ enum class TypeQuestions{
 data class TrivialSettings(
     val difficulty : Difficulty = Difficulty.EASY,
     val subject: TypeQuestions = TypeQuestions.MATH,
-    val questionsPerGame: Int = 10
+    val questionsPerGame: Int = 10,
+    val time: Int = 10
 )
 /**
  * Stores current setting in Memory.
@@ -52,11 +53,11 @@ data object TrivialSettingsManager{
 @Composable
 fun SettingsScreen(navigateToMenuScreen: () -> Unit) {
     val viewModel = viewModel { ViewModelTrivialSettings() }
-    SettingsScreenViewModel(viewModel.maxRounds.value, viewModel::changeMaxRounds,viewModel.difficulty.value,viewModel::changeDifficulty, viewModel.typeQuestion.value, viewModel::changeSubjectQuestions, viewModel::saveSettings, navigateToMenuScreen)
+    SettingsScreenViewModel(viewModel.maxRounds.value, viewModel::changeMaxRounds,viewModel.difficulty.value,viewModel::changeDifficulty, viewModel.typeQuestion.value, viewModel::changeSubjectQuestions, viewModel::saveSettings, navigateToMenuScreen, viewModel.maxTime.value, viewModel::changeMaxTime)
 }
 
 @Composable
-fun SettingsScreenViewModel(rounds: Int, onRoundsChanged: (Int)-> Unit, difficulty: Difficulty, onDifficultyChanged: (Difficulty)->Unit, subject: TypeQuestions, onSubjectChanged: (TypeQuestions) -> Unit, onSave: ()-> Unit, navigateToMenuScreen : ()->Unit){
+fun SettingsScreenViewModel(rounds: Int, onRoundsChanged: (Int)-> Unit, difficulty: Difficulty, onDifficultyChanged: (Difficulty)->Unit, subject: TypeQuestions, onSubjectChanged: (TypeQuestions) -> Unit, onSave: ()-> Unit, navigateToMenuScreen : ()->Unit, time: Int, onTimeChanged: (Int)-> Unit){
     Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp).background(Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally) {
         Row() {
             Text("Numero Rondas:")
@@ -70,27 +71,12 @@ fun SettingsScreenViewModel(rounds: Int, onRoundsChanged: (Int)-> Unit, difficul
             Text("Dificultad")
             RadioButtonSingleSelectionDifficulty(difficulty, onDifficultyChanged)
         }
+        Row(){
+            Text("Tiempo maximo")
+            RadioButtonSingleSelectionMaxTime(time, onTimeChanged)
+        }
          Button(onClick = {onSave(); navigateToMenuScreen()}){
             Text("Volver Menu") }
-    }
-}
-
-class ViewModelTrivialSettings : ViewModel(){
-    val difficulty = mutableStateOf(TrivialSettingsManager.get().difficulty)
-    val typeQuestion = mutableStateOf(TrivialSettingsManager.get().subject)
-    val maxRounds = mutableStateOf(TrivialSettingsManager.get().questionsPerGame)
-    fun changeDifficulty(newDifficulty: Difficulty){
-        difficulty.value = newDifficulty
-    }
-    fun changeMaxRounds(newMaxRounds: Int){
-        maxRounds.value = newMaxRounds
-    }
-    fun changeSubjectQuestions(newSubject: TypeQuestions){
-        typeQuestion.value = newSubject
-    }
-    fun saveSettings(){
-        val settingsFromInputs = TrivialSettings(difficulty.value, typeQuestion.value, maxRounds.value)
-        TrivialSettingsManager.update(settingsFromInputs)
     }
 }
 
@@ -177,6 +163,37 @@ fun RadioButtonSingleSelectionDifficulty(value: Difficulty, onValueChanged: (Dif
                 RadioButton(
                     selected = (text == value),
                     onClick = {onValueChanged(value)}
+                )
+                Text(
+                    text = text.toString(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
+        }
+    }
+}
+@Composable
+fun RadioButtonSingleSelectionMaxTime(value: Int, onValueChanged: (Int)-> Unit, modifier: Modifier = Modifier) {
+    val radioOptions = listOf(5, 10, 15)
+    // Note that Modifier.selectableGroup() is essential to ensure correct accessibility behavior
+    Column(modifier.selectableGroup()) {
+        radioOptions.forEach { text ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .selectable(
+                        selected = (text == value),
+                        onClick = { onValueChanged(text) },
+                        role = Role.RadioButton
+                    )
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = (text == value),
+                    onClick = {onValueChanged(text)}
                 )
                 Text(
                     text = text.toString(),

@@ -22,13 +22,6 @@ import io.ktor.util.valuesOf
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
-
-@Composable
-fun GameScreen(navigateToEndScreen: (Int) -> Unit){
-    val viewModel = viewModel {  ViewModelTrivial() }
-    GameScreenViewModel(navigateToEndScreen, viewModel::changeQuestion, viewModel::nextRound, viewModel.totalRounds.value, viewModel::timeMinus, viewModel.timeLeft.value,viewModel.score.value, viewModel::correctAnswer, viewModel.questionText.value,viewModel::resetTime)
-}
-
 @Composable
 fun CountDownScreen(timeLeft:Int, timeMinus: () -> Unit, resetTime: () -> Unit,changeQuestion:()->Unit,nextRound:() ->Unit, totalRounds: Int,navigateToEndScreen: (Int) -> Unit, score: Int){
     val maxRounds = TrivialSettingsManager.get().questionsPerGame
@@ -47,6 +40,12 @@ fun CountDownScreen(timeLeft:Int, timeMinus: () -> Unit, resetTime: () -> Unit,c
     Column{
         Text("Time Left: " + timeLeft.toString())
     }
+}
+
+@Composable
+fun GameScreen(navigateToEndScreen: (Int) -> Unit){
+    val viewModel = viewModel {  ViewModelTrivial() }
+    GameScreenViewModel(navigateToEndScreen, viewModel::changeQuestion, viewModel::nextRound, viewModel.totalRounds.value, viewModel::timeMinus, viewModel.timeLeft.value,viewModel.score.value, viewModel::correctAnswer, viewModel.questionText.value,viewModel::resetTime)
 }
 
 @Composable
